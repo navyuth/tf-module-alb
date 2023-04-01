@@ -1,4 +1,4 @@
-resource "aws_alb" "main" {
+resource "aws_lb" "main" {
   name = "${var.name}-${var.env}"
   internal = var.internal
   load_balancer_type = var.load_balancer_type
@@ -11,6 +11,22 @@ resource "aws_alb" "main" {
     var.tags,
     { Name = "${var.name}-${var.env}" }
   )
+}
+
+resource "aws_lb_listener" "main" {
+  load_balancer_arn = aws_lb.main.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/html"
+      message_body = "<h1>503 - Invalid Request</h1>"
+      status_code  = "503"
+    }
+  }
 }
 
 resource "aws_security_group" "main" {
